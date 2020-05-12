@@ -1,5 +1,5 @@
 //demo data
-export const users = [{
+export const userz = [{
         id: "1",
         name: "Ugurcan",
         email: "ugurcan@mail.com",
@@ -17,7 +17,7 @@ export const users = [{
     }
 ]
 
-export const posts = [{
+export const postz = [{
         id: "1",
         title: "Some title 1",
         body: "Some body 1",
@@ -40,7 +40,7 @@ export const posts = [{
     }
 ]
 
-export const comments = [{
+export const commentz = [{
         id: "1",
         text: "Some comment 1",
         author: "1",
