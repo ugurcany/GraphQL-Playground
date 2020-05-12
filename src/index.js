@@ -1,12 +1,18 @@
 import {
     GraphQLServer
-} from "graphql-yoga";
+} from "graphql-yoga"
+import {
+    users,
+    posts,
+    comments
+} from "./demo_data"
 
 //type definitions (schema)
 const typeDefs = `
     type Query {
-        greeting(name: String): String!
-        grades: [Int!]!
+        users(query: String): [User!]!
+        posts(query: String): [Post!]!
+        comments: [Comment!]!
         me: User!
         post: Post!
     }
@@ -16,6 +22,8 @@ const typeDefs = `
         name: String!
         email: String!
         age: Int
+        posts: [Post!]!
+        comments: [Comment!]!
     }
 
     type Post {
@@ -23,24 +31,45 @@ const typeDefs = `
         title: String!
         body: String!
         published: Boolean!
+        author: User!
+        comments: [Comment!]!
+    }
+
+    type Comment {
+        id: ID!
+        text: String!
+        author: User!
+        post: Post!
     }
 `
 
 //resolvers
 const resolvers = {
     Query: {
-        greeting(parent, args, ctx, info) {
-            if (args.name)
-                return `Hello, ${args.name}!`
-            else
-                return "Hello!"
+        users(parent, args, ctx, info) {
+            if (!args.query)
+                return users
+            return users.filter((user) =>
+                user.name.toLowerCase().includes(args.query.toLowerCase())
+            )
+        },
+        posts(parent, args, ctx, info) {
+            if (!args.query)
+                return posts
+            return posts.filter((post) =>
+                post.title.toLowerCase().includes(args.query.toLowerCase()) ||
+                post.body.toLowerCase().includes(args.query.toLowerCase())
+            )
+        },
+        comments(parent, args, ctx, info) {
+            return comments
         },
         me() {
             return {
                 id: "q4214312",
                 name: "Ugurcan",
                 email: "ugurcan@mail.com"
-            };
+            }
         },
         post() {
             return {
@@ -48,7 +77,32 @@ const resolvers = {
                 title: "Some post title",
                 body: "Some post body",
                 published: true
-            };
+            }
+        }
+    },
+    Post: {
+        author(parent, args, ctx, info) {
+            //parent == calling post object
+            return users.find((user) => user.id == parent.author)
+        },
+        comments(parent, args, ctx, info) {
+            return comments.filter((comment) => comment.post == parent.id)
+        }
+    },
+    Comment: {
+        author(parent, args, ctx, info) {
+            return users.find((user) => user.id == parent.author)
+        },
+        post(parent, args, ctx, info) {
+            return posts.find((post) => post.id == parent.post)
+        }
+    },
+    User: {
+        posts(parent, args, ctx, info) {
+            return posts.filter((post) => post.author == parent.id)
+        },
+        comments(parent, args, ctx, info) {
+            return comments.filter((comment) => comment.author == parent.id)
         }
     }
 }
@@ -56,8 +110,8 @@ const resolvers = {
 const server = new GraphQLServer({
     typeDefs,
     resolvers
-});
+})
 
 server.start(() => {
     console.log("server is up...")
-});
+})
