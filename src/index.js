@@ -6,6 +6,9 @@ import {
     posts,
     comments
 } from "./demo_data"
+import {
+    v4 as uuidv4
+} from "uuid"
 
 //type definitions (schema)
 const typeDefs = `
@@ -15,6 +18,31 @@ const typeDefs = `
         comments: [Comment!]!
         me: User!
         post: Post!
+    }
+
+    type Mutation {
+        createUser(data: CreateUserInput!): User!
+        createPost(data: CreatePostInput!): Post!
+        createComment(data: CreateCommentInput!): Comment!
+    }
+
+    input CreateUserInput {
+        name: String!
+        email: String!
+        age: Int
+    }
+
+    input CreatePostInput {
+        title: String!
+        body: String!
+        published: Boolean!
+        author: ID!
+    }
+
+    input CreateCommentInput {
+        text: String!
+        author: ID!
+        post: ID!
     }
 
     type User {
@@ -78,6 +106,48 @@ const resolvers = {
                 body: "Some post body",
                 published: true
             }
+        }
+    },
+    Mutation: {
+        createUser(parent, args, ctx, info) {
+            const isEmailTaken = users.some((user) => user.email == args.data.email);
+            if (isEmailTaken)
+                throw new Error("Email is already taken!")
+
+            const user = {
+                id: uuidv4(),
+                ...args.data
+            }
+            users.push(user)
+            return user
+        },
+        createPost(parent, args, ctx, info) {
+            const userExists = users.some((user) => user.id == args.data.author);
+            if (!userExists)
+                throw new Error("User not found!")
+
+            const post = {
+                id: uuidv4(),
+                ...args.data
+            }
+            posts.push(post)
+            return post
+        },
+        createComment(parent, args, ctx, info) {
+            const userExists = users.some((user) => user.id == args.data.author);
+            if (!userExists)
+                throw new Error("User not found!")
+
+            const postExistsAndPublished = posts.some((post) => post.id == args.data.post && post.published);
+            if (!postExistsAndPublished)
+                throw new Error("Post not found or published!")
+
+            const comment = {
+                id: uuidv4(),
+                ...args.data
+            }
+            comments.push(comment)
+            return comment
         }
     },
     Post: {
