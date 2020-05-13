@@ -1,5 +1,4 @@
-//demo data
-export const userz = [{
+const users = [{
         id: "1",
         name: "Ugurcan",
         email: "ugurcan@mail.com",
@@ -17,7 +16,7 @@ export const userz = [{
     }
 ]
 
-export const postz = [{
+const posts = [{
         id: "1",
         title: "Some title 1",
         body: "Some body 1",
@@ -40,7 +39,7 @@ export const postz = [{
     }
 ]
 
-export const commentz = [{
+const comments = [{
         id: "1",
         text: "Some comment 1",
         author: "1",
@@ -65,3 +64,9 @@ export const commentz = [{
         post: "1"
     }
 ]
+
+export const db = {
+    users,
+    posts,
+    comments
+}
